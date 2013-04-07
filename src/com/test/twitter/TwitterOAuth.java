@@ -10,6 +10,7 @@ import twitter4j.auth.RequestToken;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
+import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.app.Activity;
@@ -18,6 +19,7 @@ import android.content.SharedPreferences;
 //Twitterへの認証処理
 public class TwitterOAuth{
 
+	private static final String OAUTH_VERIFIER = "oauth_verifier";
 	private Activity m_Activity;
 	private Handler m_Handler;
 	private OAuthResultListener m_OAuthResultListener = null;
@@ -95,8 +97,11 @@ public class TwitterOAuth{
 			@Override
 			public void run() {
 				try {
+					//accessTokenを取得するためのパラメータ(oauth_verifier)がCallBackURLの中にあるのでそれの値を取ってきて認証を行う
+					Uri uri = Uri.parse(url);
+					String oauth_verifier = uri.getQueryParameter(OAUTH_VERIFIER);
 					//AccessTokenを取得する
-					accessToken = m_OAuthAuthorization.getOAuthAccessToken();
+					accessToken = m_OAuthAuthorization.getOAuthAccessToken(oauth_verifier);
 					RecordAccessToken(accessToken.getToken(),accessToken.getTokenSecret());
 					//メインスレッドに処理を投げる
 					m_Handler.post(new Runnable() {
